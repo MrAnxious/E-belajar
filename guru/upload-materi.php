@@ -1,12 +1,3 @@
-<?php
-session_start();
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guru') {
-    header("Location: login.php");
-    exit;
-}
-?>
-
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -16,6 +7,15 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guru') {
     <link rel="icon" type="image/png" href="https://smpn1mayong.sch.id/images/download-removebg-preview1.png">
     <style>
         /* Base styles */
+        :root {
+            --primary-color: #343a40;
+            --secondary-color: #f8f9fa;
+            --text-color: #343a40;
+            --background-color: #d6d6d6;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -24,24 +24,24 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guru') {
 
         body {
             font-family: 'Tahoma', sans-serif;
-            background-color: #d6d6d6;
-            color: black;
+            background-color: var(--background-color);
+            color: var(--text-color);
             line-height: 1.6;
-            padding-top: 70px; /* Add padding to account for fixed navbar */
+            padding-top: 70px;
         }
 
-        /* Updated Navbar styles */
+        /* Navbar styles */
         .navbar {
-            background-color: #343a40;
+            background-color: var(--primary-color);
             padding: 1rem;
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
         }
 
-        .nav-container {
+        .nav-content {
             max-width: 1200px;
             margin: 0 auto;
             display: flex;
@@ -52,6 +52,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guru') {
         .navbar .logo {
             display: flex;
             align-items: center;
+            gap: 1rem;
             font-size: 1.5rem;
             font-weight: bold;
             color: white;
@@ -60,45 +61,49 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guru') {
 
         .navbar .logo img {
             height: 40px;
-            margin-right: 1rem;
         }
 
-        .nav-menu {
+        .nav-links {
             display: flex;
-            align-items: center;
             gap: 1.5rem;
+            align-items: center;
         }
 
-        .nav-menu a {
+        .nav-links a {
             color: white;
             text-decoration: none;
             font-size: 1rem;
-            transition: all 0.3s ease;
             padding: 0.5rem 1rem;
             border-radius: 4px;
+            transition: all var(--transition-speed) ease;
         }
 
-        .nav-menu a:hover {
+        .nav-links a:hover {
             background-color: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
         }
 
-        .nav-toggle {
-            display: none;
-            flex-direction: column;
-            gap: 6px;
-            cursor: pointer;
-            z-index: 1001;
-            padding: 0.5rem;
-            border-radius: 4px;
+        .nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
-        .nav-toggle span {
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0.5rem;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            display: block;
             width: 25px;
             height: 3px;
             background-color: white;
-            transition: all 0.3s ease;
-            transform-origin: left;
+            margin: 5px 0;
+            transition: all var(--transition-speed) ease;
         }
 
         /* Original container styles */
@@ -219,53 +224,45 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guru') {
 
         /* Responsive design */
         @media (max-width: 768px) {
-            .nav-toggle {
-                display: flex;
+            .hamburger {
+                display: block;
             }
 
-            .nav-menu {
+            .nav-links {
                 position: fixed;
                 top: 0;
                 right: -100%;
                 height: 100vh;
                 width: 100%;
-                max-width: 300px;
-                background-color: #343a40;
+                background-color: var(--primary-color);
                 flex-direction: column;
-                padding: 5rem 2rem;
-                transition: right 0.3s ease;
+                justify-content: center;
+                transition: right var(--transition-speed) ease;
+                padding: 2rem;
             }
 
-            .nav-menu.active {
+            .nav-links.active {
                 right: 0;
             }
 
-            .nav-toggle.active span:nth-child(1) {
-                transform: rotate(45deg);
+            .nav-links a {
+                font-size: 1.2rem;
+                width: 100%;
+                text-align: center;
+                padding: 1rem;
             }
 
-            .nav-toggle.active span:nth-child(2) {
+            /* Hamburger animation */
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(45deg) translate(8px, 6px);
+            }
+
+            .hamburger.active span:nth-child(2) {
                 opacity: 0;
             }
 
-            .nav-toggle.active span:nth-child(3) {
-                transform: rotate(-45deg);
-            }
-
-            /* Add overlay when menu is open */
-            .nav-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 999;
-            }
-
-            .nav-overlay.active {
-                display: block;
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -5px);
             }
 
             .container {
@@ -303,19 +300,18 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guru') {
     </style>
 </head>
 <body>
-    <!-- Updated Navbar Structure -->
     <div class="navbar">
-        <div class="nav-container">
+        <div class="nav-content">
             <div class="logo">
-                <img src="../asset/Logo-Smp.png" alt="Logo">
+                <img src="../asset/Logo-Smp.png" alt="Logo SMPN 1 Mayong">
                 Dashboard Guru
             </div>
-            <div class="nav-toggle">
+            <button class="hamburger">
                 <span></span>
                 <span></span>
                 <span></span>
-            </div>
-            <nav class="nav-menu">
+            </button>
+            <nav class="nav-links">
                 <a href="../dashboard/guru.php">Beranda</a>
                 <a href="../guru/profile.php">Profile</a>
                 <a href="../guru/upload-tugas.php">Tugas</a>
@@ -325,7 +321,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guru') {
             </nav>
         </div>
     </div>
-    <div class="nav-overlay"></div>
 
     <div class="container">
         <h1>Upload Materi</h1>
@@ -362,35 +357,32 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guru') {
         // Set current year in footer
         document.getElementById("year").textContent = new Date().getFullYear();
 
-        // Navbar Toggle Functionality
-        const navToggle = document.querySelector('.nav-toggle');
-        const navMenu = document.querySelector('.nav-menu');
-        const navOverlay = document.querySelector('.nav-overlay');
+        // Hamburger menu functionality
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        const navLinksItems = document.querySelectorAll('.nav-links a');
 
-        function toggleMenu() {
-            navToggle.classList.toggle('active');
-            navMenu.classList.toggle('active');
-            navOverlay.classList.toggle('active');
-            document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : 'auto';
-        }
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : 'auto';
+        });
 
-        navToggle.addEventListener('click', toggleMenu);
-        navOverlay.addEventListener('click', toggleMenu);
-
-        // Close menu when clicking a link
-        const navLinks = document.querySelectorAll('.nav-menu a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (navMenu.classList.contains('active')) {
-                    toggleMenu();
-                }
+        // Close menu when clicking nav items
+        navLinksItems.forEach(item => {
+            item.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+                document.body.style.overflow = 'auto';
             });
         });
 
-        // Close menu when window is resized to desktop view
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768 && navMenu.classList.contains('active')) {
-                toggleMenu();
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!navLinks.contains(e.target) && !hamburger.contains(e.target) && navLinks.classList.contains('active')) {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+                document.body.style.overflow = 'auto';
             }
         });
 
